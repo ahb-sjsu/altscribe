@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "altscribe"
+version = "0.1.0"
+description = "AI-powered image alt-text generator for documents via pandoc"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "panflute>=2.3",
+    "anthropic>=0.42",
+    "click>=8.0",
+    "pypandoc>=1.13",
+]
+
+[project.scripts]
+altscribe = "altscribe.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/altscribe"]
