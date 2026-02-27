@@ -4,11 +4,19 @@ build-backend = "hatchling.build"
 
 [project]
 name = "altscribe"
-version = "0.1.0"
+version = "0.1.1"
 description = "AI-powered WCAG 2.1 AA compliant image alt-text generator for documents via pandoc"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Topic :: Text Processing :: Markup",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "panflute>=2.3",
     "anthropic>=0.42",

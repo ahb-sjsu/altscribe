@@ -1,7 +1,8 @@
 # altscribe
 
 [![CI](https://github.com/ahb-sjsu/altscribe/actions/workflows/ci.yaml/badge.svg)](https://github.com/ahb-sjsu/altscribe/actions/workflows/ci.yaml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/altscribe)](https://pypi.org/project/altscribe/)
+[![Python 3.10+](https://img.shields.io/pypi/pyversions/altscribe)](https://pypi.org/project/altscribe/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -28,6 +29,12 @@ Designed for **California State University faculty** to meet accessibility oblig
 - Python 3.10+
 - [pandoc](https://pandoc.org/installing.html) installed and on PATH
 - An [Anthropic API key](https://console.anthropic.com/)
+
+### Install from PyPI
+
+```bash
+pip install altscribe
+```
 
 ### Install from source
 
