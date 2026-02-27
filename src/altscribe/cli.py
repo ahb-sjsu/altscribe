@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import click
@@ -12,11 +11,40 @@ from altscribe.processor import process_document
 
 @click.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option("-o", "--output", "output_file", type=click.Path(path_type=Path), default=None, help="Output file path (default: stdout).")
-@click.option("-f", "--from", "input_format", default=None, help="Pandoc input format (default: auto-detect).")
-@click.option("-t", "--to", "output_format", default=None, help="Pandoc output format (default: markdown).")
-@click.option("--api-key", envvar="ANTHROPIC_API_KEY", required=True, help="Anthropic API key (or set ANTHROPIC_API_KEY).")
-@click.option("--overwrite", is_flag=True, default=False, help="Regenerate alt-text even for images that already have it.")
+@click.option(
+    "-o",
+    "--output",
+    "output_file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Output file path (default: stdout).",
+)
+@click.option(
+    "-f",
+    "--from",
+    "input_format",
+    default=None,
+    help="Pandoc input format (default: auto-detect).",
+)
+@click.option(
+    "-t",
+    "--to",
+    "output_format",
+    default=None,
+    help="Pandoc output format (default: markdown).",
+)
+@click.option(
+    "--api-key",
+    envvar="ANTHROPIC_API_KEY",
+    required=True,
+    help="Anthropic API key (or set ANTHROPIC_API_KEY).",
+)
+@click.option(
+    "--overwrite",
+    is_flag=True,
+    default=False,
+    help="Regenerate alt-text even for images that already have it.",
+)
 def main(
     input_file: Path,
     output_file: Path | None,

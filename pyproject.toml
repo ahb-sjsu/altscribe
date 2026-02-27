@@ -5,7 +5,8 @@ build-backend = "hatchling.build"
 [project]
 name = "altscribe"
 version = "0.1.0"
-description = "AI-powered image alt-text generator for documents via pandoc"
+description = "AI-powered WCAG 2.1 AA compliant image alt-text generator for documents via pandoc"
+readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = [
@@ -13,6 +14,7 @@ dependencies = [
     "anthropic>=0.42",
     "click>=8.0",
     "pypandoc>=1.13",
+    "httpx>=0.27",
 ]
 
 [project.scripts]
@@ -20,3 +22,26 @@ altscribe = "altscribe.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/altscribe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+
+[tool.black]
+target-version = ["py310"]
+line-length = 88
