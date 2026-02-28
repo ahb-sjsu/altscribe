@@ -23,6 +23,19 @@ Designed for **California State University faculty** to meet accessibility oblig
 | **Table Accessibility** | 1.3.1 | Missing captions, empty table headers | AI-generated captions |
 | **Document Language** | 3.1.1 | Missing `lang` attribute | Auto-detects language via `langdetect` |
 | **List Structure** | 1.3.1 | Fake lists (bullet/numbered paragraphs not using list markup) | Converts to proper list elements |
+| **Color Contrast** | 1.4.3, 1.4.11 | Insufficient contrast ratios, color-blind indistinguishable pairs | Suggests accessible replacement colors |
+
+### Document Analytics
+
+Run with `--analytics` to get detailed metrics:
+
+| Analyzer | Metrics |
+|---|---|
+| **Readability** | Flesch-Kincaid, Flesch Reading Ease, Gunning Fog, SMOG, Coleman-Liau, ARI, Dale-Chall |
+| **Text Statistics** | Word/sentence/paragraph count, avg sentence length, vocabulary diversity (TTR) |
+| **Writing Quality** | Passive voice %, complex sentence % |
+| **Content Structure** | Image/table/heading/link counts, image-to-text ratio, heading density |
+| **Accessibility Score** | Composite 0-100 score across all checks + readability |
 
 ### Core Capabilities
 
@@ -31,6 +44,9 @@ Designed for **California State University faculty** to meet accessibility oblig
 - **Selective checks** — enable/disable individual checks (`--enable`, `--disable`)
 - **Context-aware AI** — passes surrounding text and section headings to Claude for better descriptions
 - **Complex image support** — generates both short alt-text and structured long descriptions for charts, graphs, and diagrams
+- **Color contrast analysis** — WCAG contrast checking, color blindness simulation, ColorBrewer palette suggestions
+- **Document analytics** — readability scores, text stats, writing quality, accessibility scoring
+- **JSON reports** — structured output for CI integration (`--report json`)
 - **Any format in, any format out** — leverages pandoc to read and write Markdown, HTML, DOCX, RST, LaTeX, and more
 
 ## Installation
@@ -46,8 +62,11 @@ Designed for **California State University faculty** to meet accessibility oblig
 ```bash
 pip install altscribe
 
-# With automatic language detection (for document-language check)
-pip install altscribe[language]
+# With readability analytics
+pip install altscribe[analytics]
+
+# With everything (analytics + language detection)
+pip install altscribe[all]
 ```
 
 ### Install from source
@@ -81,6 +100,15 @@ altscribe syllabus.html -f html -t markdown -o syllabus.md
 
 # Regenerate alt-text even for images that already have it
 altscribe slides.md --overwrite -o slides-fixed.md
+
+# Run document analytics (readability, text stats, writing quality)
+altscribe --check --analytics lecture-notes.md
+
+# Get a JSON report for CI integration
+altscribe --check --analytics --report json lecture-notes.md
+
+# Check color contrast in HTML documents
+altscribe --enable color-contrast --check syllabus.html -f html
 ```
 
 ### Options
@@ -95,10 +123,12 @@ altscribe slides.md --overwrite -o slides-fixed.md
 | `--check` | Report-only mode — no fixes, no API calls. Exit code 1 if issues found. |
 | `--enable ID` | Only run specific check(s). Repeatable. |
 | `--disable ID` | Skip specific check(s). Repeatable. |
+| `--analytics` | Run document analytics (readability, text stats, writing quality). |
+| `--report text\|json` | Report output format (default: text). |
 
 ### Available Check IDs
 
-`image-alt-text`, `heading-hierarchy`, `link-text`, `table-accessibility`, `document-language`, `list-structure`
+`image-alt-text`, `heading-hierarchy`, `link-text`, `table-accessibility`, `document-language`, `list-structure`, `color-contrast`
 
 ## How It Works
 
@@ -125,7 +155,9 @@ altscribe is designed to satisfy the following standards as they apply to CSU:
 
 - **1.1.1 Non-text Content (Level A)** — all images receive appropriate text alternatives
 - **1.3.1 Info and Relationships (Level A)** — headings, tables, and lists use proper semantic markup
+- **1.4.3 Contrast (Minimum) (Level AA)** — text has sufficient contrast against background
 - **1.4.5 Images of Text (Level AA)** — text in images is transcribed verbatim
+- **1.4.11 Non-text Contrast (Level AA)** — UI components meet 3:1 contrast
 - **2.4.4 Link Purpose (Level A)** — link text is descriptive and non-generic
 - **2.4.6 Headings and Labels (Level AA)** — heading hierarchy is logical and complete
 - **3.1.1 Language of Page (Level A)** — document language attribute is present

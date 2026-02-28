@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from altscribe.checks.base import Check
+from altscribe.checks.color_contrast import ColorContrastCheck
 from altscribe.checks.document_language import DocumentLanguageCheck
 from altscribe.checks.heading_hierarchy import HeadingHierarchyCheck
 from altscribe.checks.image_alt_text import ImageAltTextCheck
@@ -19,10 +20,10 @@ ALL_CHECK_CLASSES: list[type] = [
     TableAccessibilityCheck,
     DocumentLanguageCheck,
     ListStructureCheck,
+    ColorContrastCheck,
 ]
 
 _NEEDS_API_KEY = {"image-alt-text", "link-text", "table-accessibility"}
-_NEEDS_BASE_DIR = {"image-alt-text"}
 
 
 def get_enabled_checks(
@@ -32,6 +33,7 @@ def get_enabled_checks(
     overwrite: bool = False,
     enabled: list[str] | None = None,
     disabled: list[str] | None = None,
+    raw_html: str = "",
 ) -> list[Check]:
     """Instantiate and return the active checkers."""
     disabled = set(disabled or [])
@@ -50,6 +52,8 @@ def get_enabled_checks(
             instances.append(
                 cls(api_key=api_key, base_dir=base_dir, overwrite=overwrite)
             )
+        elif cid == "color-contrast":
+            instances.append(cls(raw_html=raw_html))
         elif cid in _NEEDS_API_KEY:
             instances.append(cls(api_key=api_key))
         else:

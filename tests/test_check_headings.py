@@ -8,7 +8,7 @@ from altscribe.processor import process_document
 
 def _check(md: str, tmp_path: Path, fix: bool = False):
     """Run only the heading-hierarchy check."""
-    _, results = process_document(
+    _, results, _ = process_document(
         md,
         input_format="markdown",
         output_format="markdown",

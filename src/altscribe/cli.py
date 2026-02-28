@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import click
 
 from altscribe.processor import process_document
+from altscribe.reporting.formatter import build_json_report, print_analytics_report
 
 
 @click.command()
@@ -65,6 +67,19 @@ from altscribe.processor import process_document
     multiple=True,
     help="Skip these checks (by ID). Repeatable.",
 )
+@click.option(
+    "--analytics",
+    is_flag=True,
+    default=False,
+    help="Run document analytics (readability, text stats, writing quality).",
+)
+@click.option(
+    "--report",
+    "report_format",
+    type=click.Choice(["text", "json"], case_sensitive=False),
+    default="text",
+    help="Report output format (default: text).",
+)
 def main(
     input_file: Path,
     output_file: Path | None,
@@ -75,6 +90,8 @@ def main(
     check_only: bool,
     enable_checks: tuple[str, ...],
     disable_checks: tuple[str, ...],
+    analytics: bool,
+    report_format: str,
 ) -> None:
     """Check and fix accessibility issues in documents.
 
@@ -92,7 +109,7 @@ def main(
     source = input_file.read_text(encoding="utf-8")
     base_dir = input_file.parent.resolve()
 
-    result_text, check_results = process_document(
+    result_text, check_results, analyzer_results = process_document(
         source,
         input_format=input_format,
         output_format=output_format,
@@ -102,14 +119,22 @@ def main(
         fix=fix_mode,
         enabled_checks=list(enable_checks) if enable_checks else None,
         disabled_checks=list(disable_checks) if disable_checks else None,
+        run_analytics=analytics,
     )
+
+    if report_format == "json":
+        report = build_json_report(check_results, analyzer_results)
+        click.echo(json.dumps(report, indent=2))
+    elif analytics and analyzer_results:
+        print_analytics_report(analyzer_results)
 
     if fix_mode:
         if output_file:
             output_file.write_text(result_text, encoding="utf-8")
             click.echo(f"altscribe: wrote {output_file}", err=True)
         else:
-            click.echo(result_text)
+            if report_format != "json":
+                click.echo(result_text)
     else:
         total = sum(len(r.issues) for r in check_results)
         raise SystemExit(1 if total > 0 else 0)

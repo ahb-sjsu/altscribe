@@ -78,9 +78,9 @@ def _process(md, tmp_path, mock_return=None, **kwargs):
             "altscribe.checks.image_alt_text.generate_alt_text",
             return_value=mock_return,
         ) as mock:
-            result, checks = process_document(md, **defaults)
+            result, checks, _ = process_document(md, **defaults)
             return result, checks, mock
-    result, checks = process_document(md, **defaults)
+    result, checks, _ = process_document(md, **defaults)
     return result, checks, None
 
 
@@ -180,7 +180,7 @@ class TestMultipleImages:
             "altscribe.checks.image_alt_text.generate_alt_text",
             side_effect=results,
         ) as mock:
-            result, _ = process_document(
+            result, _, _ = process_document(
                 SAMPLE_MD_MULTIPLE,
                 input_format="markdown",
                 output_format="markdown",
@@ -199,7 +199,7 @@ class TestErrorHandling:
             "altscribe.checks.image_alt_text.generate_alt_text",
             side_effect=Exception("API error"),
         ):
-            result, _ = process_document(
+            result, _, _ = process_document(
                 SAMPLE_MD,
                 input_format="markdown",
                 output_format="markdown",

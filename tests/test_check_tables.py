@@ -21,7 +21,7 @@ TABLE_HTML_NO_HEADER = """\
 
 def _check(md: str, tmp_path: Path, fix: bool = False, fmt: str = "markdown"):
     """Run only the table-accessibility check."""
-    _, results = process_document(
+    _, results, _ = process_document(
         md,
         input_format=fmt,
         output_format="markdown",

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "altscribe"
-version = "0.2.0"
+version = "0.3.0"
 description = "AI-powered WCAG 2.1 AA document accessibility checker and fixer — built on pandoc and Claude"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,6 +27,8 @@ dependencies = [
 
 [project.optional-dependencies]
 language = ["langdetect>=1.0.9"]
+analytics = ["textstat>=0.7.4"]
+all = ["langdetect>=1.0.9", "textstat>=0.7.4"]
 
 [project.scripts]
 altscribe = "altscribe.cli:main"

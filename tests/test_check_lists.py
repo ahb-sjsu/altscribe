@@ -7,7 +7,7 @@ from altscribe.processor import process_document
 
 def _check(md: str, tmp_path: Path, fix: bool = False, fmt: str = "markdown"):
     """Run only the list-structure check."""
-    result_text, results = process_document(
+    result_text, results, _ = process_document(
         md,
         input_format=fmt,
         output_format="markdown",
