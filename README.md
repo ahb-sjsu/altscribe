@@ -7,19 +7,30 @@
 [![Linting: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-AI-powered, WCAG 2.1 AA compliant image alt-text generator for documents — built on [pandoc](https://pandoc.org/) and [Claude](https://www.anthropic.com/claude).
+AI-powered WCAG 2.1 AA document accessibility checker and fixer — built on [pandoc](https://pandoc.org/) and [Claude](https://www.anthropic.com/claude).
 
 Designed for **California State University faculty** to meet accessibility obligations under ADA Title II, Section 508, and the [CSU Accessible Technology Initiative](https://ati.calstate.edu/).
 
 ## Features
 
+### Accessibility Checks
+
+| Check | WCAG SC | Detects | Auto-fix |
+|---|---|---|---|
+| **Image Alt-Text** | 1.1.1, 1.4.5 | Missing/inadequate alt-text on images | AI-generated alt-text by image type |
+| **Heading Hierarchy** | 1.3.1, 2.4.6 | Missing H1, skipped levels, empty headings, fake headings (bold paragraphs) | Re-levels headings, promotes fake headings |
+| **Link Text Quality** | 2.4.4 | "Click here", bare URLs, empty links, duplicate text with different URLs | AI-suggested descriptive replacements |
+| **Table Accessibility** | 1.3.1 | Missing captions, empty table headers | AI-generated captions |
+| **Document Language** | 3.1.1 | Missing `lang` attribute | Auto-detects language via `langdetect` |
+| **List Structure** | 1.3.1 | Fake lists (bullet/numbered paragraphs not using list markup) | Converts to proper list elements |
+
+### Core Capabilities
+
 - **Automatic image classification** — detects decorative, informative, functional, complex, and text images per the [W3C WAI Images Tutorial](https://www.w3.org/WAI/tutorials/images/)
-- **WCAG 2.1 Level AA compliant** (SC 1.1.1 Non-text Content, SC 1.4.5 Images of Text)
-- **Context-aware** — passes surrounding text and section headings to the model for better descriptions
+- **Check-only mode** — report issues without making changes or API calls (`--check`)
+- **Selective checks** — enable/disable individual checks (`--enable`, `--disable`)
+- **Context-aware AI** — passes surrounding text and section headings to Claude for better descriptions
 - **Complex image support** — generates both short alt-text and structured long descriptions for charts, graphs, and diagrams
-- **Functional image detection** — identifies images inside links/buttons and describes the action, not appearance
-- **Decorative image handling** — produces empty `alt=""` for non-informational images
-- **Images of text** — transcribes visible text verbatim
 - **Any format in, any format out** — leverages pandoc to read and write Markdown, HTML, DOCX, RST, LaTeX, and more
 
 ## Installation
@@ -34,6 +45,9 @@ Designed for **California State University faculty** to meet accessibility oblig
 
 ```bash
 pip install altscribe
+
+# With automatic language detection (for document-language check)
+pip install altscribe[language]
 ```
 
 ### Install from source
@@ -50,17 +64,23 @@ pip install -e .
 # Set your API key (or pass --api-key)
 export ANTHROPIC_API_KEY=sk-ant-...
 
-# Process a Markdown file
+# Fix all accessibility issues in a Markdown file
 altscribe lecture-notes.md -o lecture-notes-accessible.md
+
+# Check only — report issues without fixing (no API calls, free)
+altscribe --check lecture-notes.md
+
+# Run only specific checks
+altscribe --enable heading-hierarchy --enable link-text --check doc.md
+
+# Skip certain checks
+altscribe --disable image-alt-text doc.md -o fixed.md
 
 # Convert HTML to accessible Markdown
 altscribe syllabus.html -f html -t markdown -o syllabus.md
 
 # Regenerate alt-text even for images that already have it
 altscribe slides.md --overwrite -o slides-fixed.md
-
-# Output to stdout
-altscribe document.md
 ```
 
 ### Options
@@ -70,21 +90,24 @@ altscribe document.md
 | `-o, --output FILE` | Output file path (default: stdout) |
 | `-f, --from FORMAT` | Pandoc input format (default: auto-detect) |
 | `-t, --to FORMAT` | Pandoc output format (default: markdown) |
-| `--api-key KEY` | Anthropic API key (or set `ANTHROPIC_API_KEY`) |
+| `--api-key KEY` | Anthropic API key (or set `ANTHROPIC_API_KEY`). Only required in fix mode. |
 | `--overwrite` | Regenerate alt-text for images that already have it |
+| `--check` | Report-only mode — no fixes, no API calls. Exit code 1 if issues found. |
+| `--enable ID` | Only run specific check(s). Repeatable. |
+| `--disable ID` | Skip specific check(s). Repeatable. |
+
+### Available Check IDs
+
+`image-alt-text`, `heading-hierarchy`, `link-text`, `table-accessibility`, `document-language`, `list-structure`
 
 ## How It Works
 
 1. **Parse** — reads the input document into a pandoc AST via [panflute](https://github.com/sergiocorreia/panflute)
-2. **Walk** — traverses every `Image` node in the document
-3. **Classify** — sends each image to Claude's vision API, which classifies it into one of five W3C WAI categories (decorative, informative, functional, complex, text)
-4. **Generate** — produces category-appropriate alt-text:
-   - *Decorative*: `alt=""`
-   - *Informative*: concise description under 125 characters
-   - *Functional*: describes the action/destination of the parent link or button
-   - *Complex*: short alt-text plus a structured long description inserted after the image
-   - *Text*: verbatim transcription of all visible text
-5. **Output** — writes the modified document in any pandoc-supported format
+2. **Walk** — traverses the AST once, dispatching each element to registered checkers (headings, images, links, tables, lists, etc.)
+3. **Analyze** — each checker accumulates issues: missing alt-text, skipped heading levels, generic link text, fake lists, and more
+4. **Fix** (unless `--check`) — checkers apply auto-fixes: AI-generated alt-text, re-leveled headings, proper list markup, language tags
+5. **Report** — prints a summary of all issues found and fixed to stderr
+6. **Output** — writes the modified document in any pandoc-supported format
 
 ## Compliance
 
@@ -101,7 +124,11 @@ altscribe is designed to satisfy the following standards as they apply to CSU:
 ### WCAG success criteria addressed
 
 - **1.1.1 Non-text Content (Level A)** — all images receive appropriate text alternatives
+- **1.3.1 Info and Relationships (Level A)** — headings, tables, and lists use proper semantic markup
 - **1.4.5 Images of Text (Level AA)** — text in images is transcribed verbatim
+- **2.4.4 Link Purpose (Level A)** — link text is descriptive and non-generic
+- **2.4.6 Headings and Labels (Level AA)** — heading hierarchy is logical and complete
+- **3.1.1 Language of Page (Level A)** — document language attribute is present
 
 ### Image handling per W3C WAI guidelines
 
