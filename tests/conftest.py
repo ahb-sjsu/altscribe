@@ -5,6 +5,7 @@ If the pandoc binary is not installed on the runner we skip those tests
 cleanly rather than fail — this keeps the PyPI install verifiable even
 on hosts without pandoc.
 """
+import pathlib
 from shutil import which
 
 import pytest
@@ -18,7 +19,7 @@ def pytest_collection_modifyitems(config, items):
         # Only skip tests that actually invoke process_document / panflute.
         src = item.module.__file__
         try:
-            text = open(src, encoding="utf-8").read()
+            text = pathlib.Path(src).read_text(encoding="utf-8")
         except Exception:
             continue
         if "process_document" in text or "panflute" in text:

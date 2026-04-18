@@ -5,6 +5,7 @@ from pathlib import Path
 from altscribe.processor import process_document
 
 
+
 def _analyze(md: str, tmp_path: Path):
     """Run only the content-structure analyzer."""
     _, _, analyzer_results = process_document(
