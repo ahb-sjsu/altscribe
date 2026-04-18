@@ -5,6 +5,7 @@ If the pandoc binary is not installed on the runner we skip those tests
 cleanly rather than fail — this keeps the PyPI install verifiable even
 on hosts without pandoc.
 """
+
 import pathlib
 from shutil import which
 
