@@ -139,6 +139,41 @@ altscribe --enable color-contrast --check syllabus.html -f html
 5. **Report** — prints a summary of all issues found and fixed to stderr
 6. **Output** — writes the modified document in any pandoc-supported format
 
+```mermaid
+flowchart LR
+    IN["Input doc<br/>(MD/HTML/DOCX/RST/LaTeX)"]
+    P[pandoc + panflute<br/>parse to AST]
+    W[AST walker]
+
+    subgraph CH["Checkers"]
+      direction TB
+      C1[Images: alt-text]
+      C2[Headings: hierarchy]
+      C3[Links: text quality]
+      C4[Tables: captions]
+      C5[Lists: real vs fake]
+      C6[Language: lang attr]
+      C7[Contrast: WCAG]
+    end
+
+    AI["Claude API"]
+    FIX[Apply auto-fixes]
+    REP[Report stdout or JSON]
+    OUT["Output doc<br/>(any pandoc format)"]
+
+    IN --> P --> W --> CH
+    C1 --> AI
+    C3 --> AI
+    C4 --> AI
+    C7 --> AI
+    AI --> FIX
+    C2 --> FIX
+    C5 --> FIX
+    C6 --> FIX
+    FIX --> OUT
+    FIX --> REP
+```
+
 ## Compliance
 
 altscribe is designed to satisfy the following standards as they apply to CSU:
